@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: pythonrs
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pythonrs
+  template:
+      metadata:
+        name: pythonapppod
+        labels:
+          app: pythonrs
+      spec:
+        containers:
+        - name: pythonappcontainer
+          image: dockerhandson/python-app:1
+          ports:
+          - containerPort: 5000
+          resources:
+#            requests: 
+ #             cpu: 200m
+  #            memory: 256Mi
+            limits:
+             cpu: 0.25
+             memory: 256Mi       
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: pythonappsvc
+spec:
+  selector:
+    app: pythonrs
+  ports:
+  - port: 80
+    targetPort: 8080

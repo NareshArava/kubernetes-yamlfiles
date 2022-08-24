@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: javawebappdeployment
+spec:
+  replicas: 2
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: javawebapp
+  template:
+      metadata:
+        name: javawebapppod
+        labels:
+          app: javawebapp
+      spec:
+        volumes:
+        - name: tomcatconf
+          configMap:
+             name: tomcatuserconf
+             items:
+             - key: "tomcat-users.xml"
+               path: "tomcat-users.xml"
+        containers:
+        - name: javawebapp
+          image: dockerhandson/java-web-app:2
+          ports:
+          - containerPort: 8080
+          resources:
+             requests:
+               cpu: 100m
+               memory: 128Mi
+             limits:
+                cpu: 1
+                memory: 1Gi
+          volumeMounts:
+          - name: tomcatconf
+            mountPath: /usr/local/tomcat/conf/tomcat-users.xml
+            subPath: "tomcat-users.xml"
+          livenessProbe:
+           httpGet:
+            path: /java-web-app
+            port: 8080
+           initialDelaySeconds: 60
+           periodSeconds: 30
+          readinessProbe:
+           httpGet:
+            path: /java-web-app
+            port: 8080
+           initialDelaySeconds: 60
+           periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: javawebappsvc
+spec:
+  type: NodePort
+  selector:
+    app: javawebapp
+  ports:
+    - port: 80
+      targetPort: 8080

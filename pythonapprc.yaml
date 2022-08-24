@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: pythonapppod
+    labels:
+       app: pythonapp 
+spec:
+  containers:
+  - name: pythnappcontainer
+    image: dockerhandson/python-app:1
+    ports:
+    - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: pythonappsvc
+spec:
+  type: NodePort    
+  selector:
+    app: pythonapp
+   #version: one  more filters here
+  ports:
+   - port: 80
+     targetPort: 5000
